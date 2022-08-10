@@ -14,7 +14,7 @@ opts.Add(EnumVariable("target", "Compilation target", "debug", ["debug", "releas
 opts.Add(BoolVariable("use_llvm", "Use the LLVM / Clang compiler", "no"))
 
 # Platform options.
-platform_array = ["", "linux", "macos"]
+platform_array = ["", "windows", "linux", "macos"]
 platform_aliases = {
     "osx": "macos",
     "darwin": "macos",
@@ -115,6 +115,24 @@ elif env_platform == "linux":
         env.Append(CCFLAGS=["-fPIC", "-g3", "-Og"])
     else:
         env.Append(CCFLAGS=["-fPIC", "-g", "-O3"])
+
+elif env_platform == "windows":
+    if env_arch != "x86_64":
+        print("Only x86_64 is supported on Windows. Exiting.")
+        Exit()
+
+    # This makes sure to keep the session environment variables
+    # on Windows, so that you can run scons in a VS 2017 prompt
+    # and it will find all the required tools.
+    env = Environment(ENV=os.environ)
+    opts.Update(env)
+    env.Append(LINKFLAGS=["-lws2_32"])
+
+    env.Append(CCFLAGS=["-DWIN32", "-D_WIN32", "-D_WINDOWS", "-W3", "-GR", "-D_CRT_SECURE_NO_WARNINGS"])
+    if env["target"] == "debug":
+        env.Append(CCFLAGS=["-EHsc", "-D_DEBUG", "-MDd"])
+    else:
+        env.Append(CCFLAGS=["-O2", "-EHsc", "-DNDEBUG", "-MD"])
 
 env.Append(CXXFLAGS=["-std=c++11"])
 

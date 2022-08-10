@@ -7,10 +7,11 @@
 #include <string.h>
 
 #ifdef _WIN32
-#include <afunix.h>
-#include <mswsock.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+
+#include <mswsock.h>
+#include <afunix.h>
 #else
 #include <sys/socket.h>
 #include <sys/un.h>
